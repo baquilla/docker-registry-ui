@@ -51,6 +51,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
           >
             Tag
           </th>
+          <th id="image-id-header" title="Image ID is indeed the image manifest sh256 digest truncated to the 12 beginning chars as shown at docker images command.">Image Id</th>
           <th class="architectures">Arch</th>
           <th class="show-tag-history" if="{ props.showTagHistory }">History</th>
           <th
@@ -81,7 +82,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
         </tr>
       </thead>
       <tbody>
-        <tr each="{ image in getPage(props.tags, props.page) }" if="{ matchSearch(props.filterResults, image.tag) }">
+        <tr each="{ image in getPage(props.tags, props.page) }" if="{ matchSearch(props.filterResults, image.tag+image.sha256) }">
           <td class="creation-date">
             <image-date image="{ image }"></image-date>
           </td>
@@ -105,6 +106,9 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
               pull-url="{ props.pullUrl }"
               on-notify="{ props.onNotify }"
             ></copy-to-clipboard>
+          </td>
+          <td>
+            <image-id image="{ image }"></image-id>
           </td>
           <td class="architectures">
             <architectures image="{ image }"></architectures>
@@ -132,6 +136,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
     import ImageDate from './image-date.riot';
     import ImageSize from './image-size.riot';
     import ImageTag from './image-tag.riot';
+    import ImageId from './image-id.riot';
     import ImageContentDigest from './image-content-digest.riot';
     import CopyToClipboard from './copy-to-clipboard.riot';
     import TagHistoryButton from './tag-history-button.riot';
@@ -148,6 +153,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
         ImageDate,
         ImageSize,
         ImageTag,
+        ImageId,
         ImageContentDigest,
         CopyToClipboard,
         RemoveImage,
@@ -186,7 +192,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
         if (event.altKey === true) {
           const tags = getPage(this.props.tags, this.props.page);
           tags
-            .filter((image) => matchSearch(this.props.filterResults, image.tag))
+            .filter((image) => matchSearch(this.props.filterResults, image.tag+image.sha256))
             .forEach((tag) => this.state.toDelete.add(tag));
           this.update({
             multiDelete: true,
